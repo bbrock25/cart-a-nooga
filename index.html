@@ -29,6 +29,9 @@
       socket.on('route_list', function(data){
         console.log(data);
       });
+      socket.on('system_time', function(data){
+        console.log(data['bustime-response'].tm);
+      });
 
       var photos = [];
       function init() {

@@ -1,41 +1,7 @@
 var rest = require('restler'),
     xml2js = require('xml2js'),
     eyes = require('eyes'),
-    app = require('express')(),
-    server = require('http').createServer(app),
-    io = require('socket.io').listen(server, {'log': false}),
     events = require('events');
-
-
-var EventEmitter = new events.EventEmitter();
-var express = require('express');
-
-
-server.listen(8000);
-
-
-app.use(express.static(__dirname + "/"));
-app.use(express.static(__dirname + "/lib"));
-
-console.log(__dirname)
-
-app.get('/', function (req, res) {
-   console.log(req);
-  res.sendfile(__dirname + '/index.html');
-});
-
-io.sockets.on('connection', function (socket) {
-  console.log('server socket connection opened!');
-  var routes_i = new Routes();
-  console.log('routes_i.submit_query:', routes_i.submit_query());
-  routes_i.on('update', function(){
-    console.log('emitting!');
-    socket.emit('route_list', routes_i.variable);
-
-  });
-
-
-});
 
 function API_Interface(){
   this.query_args = {};
@@ -44,7 +10,7 @@ function API_Interface(){
   events.EventEmitter.call(this);
 };
 
-API_Interface.prototype.__proto__ = events.EventEmitter.prototype;
+API_Interface.prototype = Object.create(events.EventEmitter.prototype);
 
 API_Interface.prototype.form_uri = function(){
 
@@ -104,7 +70,7 @@ API_Interface.prototype.submit_query = function(){
   });
 }
 
-function Vehicles(){
+exports.Vehicles = function Vehicles(){
   API_Interface.call(this);
   this.query_args = {
     vid: [],
@@ -113,10 +79,9 @@ function Vehicles(){
   this.base_query = '/getvehicles';
 }
 
-Vehicles.prototype = new API_Interface();
-Vehicles.prototype.constructor = Vehicles;
-
-Vehicles.prototype.set_query_args = function(args){
+exports.Vehicles.prototype = new API_Interface();
+exports.Vehicles.prototype.constructor = exports.Vehicles;
+exports.Vehicles.prototype.set_query_args = function(args){
   if(args.rt !== undefined)
     this.query_args.rt = args.rt;
 
@@ -124,29 +89,18 @@ Vehicles.prototype.set_query_args = function(args){
     this.query_args.vid = args.vid;
 }
 
-function Routes(){
+exports.Routes = function Routes(){
   API_Interface.call(this);
   this.base_query = '/getroutes';
 }
-Routes.prototype = new API_Interface();
-Routes.prototype.constructor = Routes;
+exports.Routes.prototype = new API_Interface();
+exports.Routes.prototype.constructor = exports.Routes;
 
-function SystemTime(){
+exports.SystemTime = function SystemTime(){
   API_Interface.call(this);
   this.base_query = '/gettime';
 }
-
-SystemTime.prototype = new API_Interface();
-SystemTime.prototype.constructor = SystemTime();
-
-SystemTime.prototype.update = function(json_response){
-  console.log(json_response);
-  var bustime_response = json_response['bustime-response'];
-  this.variable = bustime_response.tm;
-}
-
-// var time_i = new SystemTime();
-// console.log('time_i.submit_query', time_i.submit_query());
-
+exports.SystemTime.prototype = new API_Interface();
+exports.SystemTime.prototype.constructor = exports.SystemTime;
 
 
